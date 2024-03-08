@@ -1,5 +1,6 @@
 math.randomseed(78436)
 
+-- 2, 0.3; 2.5, 0.5
 -- Ratio-of-Uniforms
 MAGICCONST = 4 * math.exp(-0.5) / math.sqrt(2)
 function NormalR(mean, std)
@@ -15,6 +16,7 @@ function NormalR(mean, std)
     return mean + z * std
 end
 
+--1.5; 4
 --Exponential
 function ExpoR(lambda)
     lambda = lambda or 1
