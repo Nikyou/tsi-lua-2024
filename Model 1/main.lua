@@ -29,6 +29,15 @@ function Round(number)
     return math.floor((number+0.005)*100)/100
 end
 
+--Get minimal value from table
+function TableMin(table)
+    local min = math.huge
+    for i = 1, #table  do
+        min = min < table[i] and min or table[i]
+    end
+    return min
+end
+
 --random functions predefined for two processes
 function I1random()
     return Round(ExpoR(1.5))
@@ -60,9 +69,9 @@ function Parse_queue(queue)
                 result = result .. ", ..."
                 break
             end
-            if not v == 1 then result = result .. ", " end
+            if v > 1 then result = result .. ", " end
 
-            result = result .. k.event
+            result = result .. k.name
         end
     end
 
@@ -70,14 +79,15 @@ function Parse_queue(queue)
 end
 
 --Function to add a row to the table in csv format
-function Add_table_row(row)
-    local queue = Parse_queue(Queue:getQueue())
-    Table = Table .. row.event .. "; " .. row.time .. "; " .. row.j1 .. "; " .. row.j2 .. "; " .. row.st .. "; " .. Queue:length() .. "; " .. queue .. "\n"
+function Add_table_row(sim)
+    local queue = Parse_queue(sim.queue:getQueue())
+    Table = Table .. sim.event .. "; " .. sim.time .. "; " .. sim.j1.time .. "; " .. sim.j2.time .. "; " .. sim.st .. "; " .. sim.status .. "; " .. sim.queue:length() .. "; " .. queue .. "\n"
 end
 
 --Initialize queue object (OOP approach)
-Queue = {}
-Queue.q = {}
+Queue = {
+    q = {}
+}
 
 function Queue:getQueue()
     return self.q
@@ -92,4 +102,119 @@ end
 --Realisation of Queue.get() FIFO
 function Queue:get()
     return table.remove(self.q, 1)
+end
+
+--Initialize global table
+Simulation = {
+    event = "Start",
+    time = 0,
+    j1 = {
+        process = {
+            name = "J1",
+            p_time = P1random,
+        },
+        random = I1random,
+        time = I1random(),
+    },
+    j2 = {
+        process = {
+            name = "J2",
+            p_time = P2random,
+        },
+        random = I2random,
+        time = I2random(),
+    },
+    st = Stop_time+1,
+    status = 0,
+    queue = Queue,
+}
+
+--Job 1 or Job 2 has arrived
+function Job_arrival(job)
+    Simulation.time = Simulation[job].time
+    Simulation[job].time = Simulation.time + Simulation[job].random()
+
+    if Simulation.status == 0 then
+        Simulation.status = 1
+        Simulation.event = Simulation[job].process.name
+        Simulation.st = Simulation.time + Simulation[job].process.p_time()
+    else
+        Simulation.queue:add(Simulation[job].process)
+    end
+end
+
+--Stop time has arrived
+function St_arrival()
+    Simulation.time = Simulation.st
+
+    if Simulation.queue:length() == 0 then
+        Simulation.st = Stop_time+1
+        Simulation.event = "Waiting"
+        Simulation.status = 0
+    else
+        Simulation.status = 1
+        local process = Simulation.queue:get()
+        Simulation.event = process.name
+        Simulation.st = Simulation.time + process.p_time()
+    end
+end
+
+--MoEs as object
+MoE1 = {
+    last_time = nil,
+    time_sum = 0,
+}
+MoE2 = {
+    value = 0
+}
+--Downtime factor
+function MoE1:update(sim)
+    if self.last_time ~= nil then
+        self.time_sum = self.time_sum + (sim.time - self.last_time)
+    end
+    if sim.status == 1 then
+        self.last_time = sim.time
+    else
+        self.last_time = nil
+    end
+end
+function MoE1:getValue()
+    return 1 - Round(self.time_sum / Stop_time)
+end
+--Maximum of all jobs in queue
+function MoE2:update(sim)
+    if sim.queue:length() > self.value then
+        self.value = sim.queue:length()
+    end
+end
+function MoE2:getValue()
+    return self.value
+end
+
+--Start of simulation
+Create_table()
+while Simulation.time < Stop_time do
+    Add_table_row(Simulation)
+    MoE1:update(Simulation)
+    MoE2:update(Simulation)
+    local closestEvent = TableMin({Simulation.j1.time, Simulation.j2.time, Simulation.st})
+    if closestEvent == Simulation.j1.time then
+        Job_arrival("j1")
+    elseif closestEvent == Simulation.j2.time then
+        Job_arrival("j2")
+    elseif closestEvent == Simulation.st then
+        St_arrival()
+    end
+end
+
+--End of simulation
+Simulation.time = Stop_time
+Simulation.event = "Stop"
+Add_table_row(Simulation)
+print("Downtime:" .. MoE1:getValue() .. "\tMax queue length: " .. MoE2:getValue())
+
+local file = io.open("tableOutput.csv", "w")
+if file then
+    file:write(Table)
+    file:close()
 end
