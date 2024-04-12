@@ -1,5 +1,8 @@
 math.randomseed(78436)
 Stop_time = 500
+Precision = 2
+--File name for output table
+File_name = "tableOutput" .. "" .. ".csv"
 
 -- 2, 0.3; 2.5, 0.5
 -- Ratio-of-Uniforms
@@ -26,16 +29,7 @@ end
 
 --Rounding shortcut to 0.01
 function Round(number)
-    return math.floor((number+0.005)*100)/100
-end
-
---Get minimal value from table
-function TableMin(table)
-    local min = math.huge
-    for i = 1, #table  do
-        min = min < table[i] and min or table[i]
-    end
-    return min
+    return math.floor((number+5/(math.pow(10,Precision + 1)))*math.pow(10,Precision))/math.pow(10,Precision)
 end
 
 --random functions predefined for two processes
@@ -54,7 +48,7 @@ end
 
 --Function to create csv file headers and initialize global variable
 function Create_table()
-    Table = "Event; Time; Job 1; Job 2; Stop time; Status; Queue length; Queue" .. "\n"
+    Table = "Event; Time; Job 1; Job 2; Stop time; Status; Queue length; Queue; MoE1; MoE2" .. "\n"
 end
 
 --Function to parse queue to string
@@ -81,7 +75,7 @@ end
 --Function to add a row to the table in csv format
 function Add_table_row(sim)
     local queue = Parse_queue(sim.queue:getQueue())
-    Table = Table .. sim.event .. "; " .. sim.time .. "; " .. sim.j1.time .. "; " .. sim.j2.time .. "; " .. sim.st .. "; " .. sim.status .. "; " .. sim.queue:length() .. "; " .. queue .. "\n"
+    Table = Table .. sim.event .. "; " .. sim.time .. "; " .. sim.j1.time .. "; " .. sim.j2.time .. "; " .. sim.st .. "; " .. sim.status .. "; " .. sim.queue:length() .. "; " .. queue .. "; " .. MoE1:getValue(sim.time) .. "; " .. MoE2:getValue() .. "\n"
 end
 
 --Initialize queue object (OOP approach)
@@ -178,8 +172,10 @@ function MoE1:update(sim)
         self.last_time = nil
     end
 end
-function MoE1:getValue()
-    return 1 - Round(self.time_sum / Stop_time)
+function MoE1:getValue(time)
+    time = time or Stop_time
+    if time == 0 then time = 0.000001 end
+    return 1 - Round(self.time_sum / time)
 end
 --Maximum of all jobs in queue
 function MoE2:update(sim)
@@ -194,10 +190,11 @@ end
 --Start of simulation
 Create_table()
 while Simulation.time < Stop_time do
-    Add_table_row(Simulation)
     MoE1:update(Simulation)
     MoE2:update(Simulation)
-    local closestEvent = TableMin({Simulation.j1.time, Simulation.j2.time, Simulation.st})
+    Add_table_row(Simulation)
+    local closestEvent = math.min(Simulation.j1.time, Simulation.j2.time, Simulation.st)
+    if closestEvent > Stop_time then break end --Safeguard to prevent an event slip-up
     if closestEvent == Simulation.j1.time then
         Job_arrival("j1")
     elseif closestEvent == Simulation.j2.time then
@@ -211,9 +208,8 @@ end
 Simulation.time = Stop_time
 Simulation.event = "Stop"
 Add_table_row(Simulation)
-print("Downtime:" .. MoE1:getValue() .. "\tMax queue length: " .. MoE2:getValue())
 
-local file = io.open("tableOutput.csv", "w")
+local file = io.open(File_name, "w")
 if file then
     file:write(Table)
     file:close()
