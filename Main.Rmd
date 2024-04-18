@@ -71,3 +71,21 @@ abline(0, 1, col = "red", lwd = 2)
 # Kolmogorov-Smirnov test for exponentiality
 ks.test(exp_data, "pexp", rate = lambda)
 ```
+
+```{r}
+
+data <- c(2500, 2578, 2513, 2571, 2578, 2601, 2520, 2476, 2506, 2492)
+
+summary(data)
+print(paste('Std:' , round(sd(data),3)))
+
+getmode <- function(v) {
+   uniqv <- unique(v)
+   uniqv[which.max(tabulate(match(v, uniqv)))]
+}
+
+print(paste('Mode:' , getmode(data)))
+
+
+
+```
