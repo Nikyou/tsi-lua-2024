@@ -1,63 +1,13 @@
---[[
--- Box-Muller transform
-function NormalR(mean, std)
-    mean = mean or 0
-    std = std or 1
-    local u1 = math.random()
-    local u2 = math.random()
-    local z = math.sqrt(-2 * math.log(u1)) * math.cos(2 * math.pi * u2)
-    return z * std + mean
-end
--- Ziggurat Algorithm
-function NormalRZ(mean, std)
-    local x, y
-    local r = 0
-    repeat
-        x = 2 * math.random() - 1
-        y = 2 * math.random() - 1
-        r = x * x + y * y
-    until r < 1 and r ~= 0
-
-    local z = math.sqrt(-2 * math.log(r) / r)
-    return z * x * std + mean
-end
--- Ratio-of-Uniforms
-function NormalRR(mean, std)
-    local u1, u2, v1, v2, s
-    repeat
-        u1 = math.random()
-        u2 = math.random() * 2.5066282746310007 -- Maximum value of PDF of standard normal distribution
-        v1 = 2 * u1 - 1
-        v2 = 2 * u2 - 1
-        s = v1 * v1 + v2 * v2
-    until s < 1 and s > 0
-    local z = math.sqrt(-2 * math.log(s) / s)
-    return z * v1 * std + mean
-end
-function NormalRR2(mean, std)
-    local u1 = 1.0 - math.random()
-    local u2 = 1.0 - math.random()
-    local r = math.sqrt(-2.0 * math.log(u1))
-    local theta = 2.0 * math.pi * u2
-    local z = r * math.sin(theta)
-    return z * std + mean
-end
-
---Marsaglia polar method
-function NormalRM(mean, std)
-    local u1, u2, w
-    repeat
-        u1 = 2 * math.random() - 1
-        u2 = 2 * math.random() - 1
-        w = u1 * u1 + u2 * u2
-    until w < 1 and w > 0
-    local mult = math.sqrt(-2 * math.log(w) / w)
-    local z1 = u1 * mult
-    return z1 * std + mean
-end
-]]
 math.randomseed(78436)
+Precision = 2
+--File name for output
+File_name1 = "output.txt"
+File_name2 = "outputE.txt"
 
+--Rounding shortcut to 0.01
+function Round(number)
+    return math.floor((number+5/(math.pow(10,Precision + 1)))*math.pow(10,Precision))/math.pow(10,Precision)
+end
 
 -- Ratio-of-Uniforms
 MAGICCONST = 4 * math.exp(-0.5) / math.sqrt(2)
@@ -81,16 +31,25 @@ function ExpoR(lambda)
 end
 
 
-local str = ""
-local str = math.floor((NormalR(2, 0.3)+0.005)*100)/100
---local str = ExpoR(1.5)
+local str
+str = Round(NormalR(2, 0.3))
 for i = 1, 1000-1 do
-    --str = str .. ' ' .. NormalRR3(2, 0.3)
-    str = str .. '\n' .. math.floor((NormalR(2, 0.3)+0.005)*100)/100
-    --str = str .. '\n' .. ExpoR(1.5)
+    str = str .. '\n' .. Round(NormalR(2, 0.3))
 end
 
-local file = io.open("output.txt", "w")
+local file = io.open(File_name1, "w")
+if file then
+    file:write(str)
+    file:close()
+end
+
+
+str = Round(ExpoR(1.5))
+for i = 1, 1000-1 do
+    str = str .. '\n' .. Round(ExpoR(1.5))
+end
+
+file = io.open(File_name2, "w")
 if file then
     file:write(str)
     file:close()

@@ -1,26 +1,21 @@
 ---
 title: "Distribution check"
 output: html_document
-date: "2024-02-29"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
 ```{r}
-data <- read.table(file ="D:\\Programs\\Lua\\Model1\\output.txt", header = FALSE, as.is = FALSE)
+library(here)
+
+data <- read.table(file =here("output.txt"), header = FALSE, as.is = FALSE)
 data <- as.numeric(as.character(unlist(data)))
 
 summary(data)
-print('SD')
-round(sd(data),3)
+print(paste('Std:' , round(sd(data),3)))
+
 
 # Kolmogorov-Smirnov Test
 ks.test(data, "pnorm", mean=mean(data), sd=sd(data))
@@ -29,7 +24,7 @@ ks.test(data, "pnorm", mean=mean(data), sd=sd(data))
 bin_width <- 2 * IQR(data) * length(data)^(-1/3)
 num_bins <- diff(range(data)) / bin_width
 num_bins <- ceiling(num_bins)
-print(num_bins)
+
 # Create breaks for binning
 breaks <- seq(min(data), max(data), length.out = num_bins)
 # Bin the data
@@ -53,7 +48,7 @@ qqline(data, col = "red")
 
 ```
 ```{r}
-exp_data<- read.table(file ="D:\\Programs\\Lua\\Model1\\outputE.txt", header = FALSE, as.is = FALSE)
+exp_data<- read.table(file =here("outputE.txt"), header = FALSE, as.is = FALSE)
 exp_data <- as.numeric(as.character(unlist(exp_data)))
 
 lambda <- 1.5
