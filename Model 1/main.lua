@@ -48,7 +48,7 @@ end
 
 --Function to create csv file headers and initialize global variable
 function Create_table()
-    Table = "Event; Time; Job 1; Job 2; Stop time; Status; Queue length; Queue; MoE1; MoE2" .. "\n"
+    Table = "Event;Time;Job 1;Job 2;Stop time;Status;Queue length;Queue;MoE1;MoE2" .. "\n"
 end
 
 --Function to parse queue to string
@@ -75,7 +75,7 @@ end
 --Function to add a row to the table in csv format
 function Add_table_row(sim)
     local queue = Parse_queue(sim.queue:getQueue())
-    Table = Table .. sim.event .. "; " .. sim.time .. "; " .. sim.j1.time .. "; " .. sim.j2.time .. "; " .. sim.st .. "; " .. sim.status .. "; " .. sim.queue:length() .. "; " .. queue .. "; " .. MoE1:getValue(sim.time) .. "; " .. MoE2:getValue() .. "\n"
+    Table = Table .. sim.event .. ";" .. sim.time .. ";" .. sim.j1.time .. ";" .. sim.j2.time .. ";" .. sim.st .. ";" .. sim.status .. ";" .. sim.queue:length() .. ";" .. queue .. ";" .. MoE1:getValue(sim.time) .. ";" .. MoE2:getValue() .. "\n"
 end
 
 --Initialize queue object (OOP approach)
