@@ -385,12 +385,12 @@
 								<EntityEmbeddedObject>
 									<ActiveObjectClass>
 										<PackageName><![CDATA[model_3]]></PackageName>
-										<ClassName><![CDATA[Process]]></ClassName>
+										<ClassName><![CDATA[Job]]></ClassName>
 									</ActiveObjectClass>
 									<GenericParameterSubstitute>
 										<GenericParameterSubstituteReference>
 											<PackageName><![CDATA[model_3]]></PackageName>
-											<ClassName><![CDATA[Process]]></ClassName>
+											<ClassName><![CDATA[Job]]></ClassName>
 											<ItemName><![CDATA[1710496626671]]></ItemName>
 										</GenericParameterSubstituteReference>
 									</GenericParameterSubstitute>
@@ -646,12 +646,12 @@
 								<EntityEmbeddedObject>
 									<ActiveObjectClass>
 										<PackageName><![CDATA[model_3]]></PackageName>
-										<ClassName><![CDATA[Process]]></ClassName>
+										<ClassName><![CDATA[Job]]></ClassName>
 									</ActiveObjectClass>
 									<GenericParameterSubstitute>
 										<GenericParameterSubstituteReference>
 											<PackageName><![CDATA[model_3]]></PackageName>
-											<ClassName><![CDATA[Process]]></ClassName>
+											<ClassName><![CDATA[Job]]></ClassName>
 											<ItemName><![CDATA[1710496626671]]></ItemName>
 										</GenericParameterSubstituteReference>
 									</GenericParameterSubstitute>
@@ -1239,7 +1239,7 @@
 		<!--   =========   Active Object Class   ========  -->
 		<ActiveObjectClass>
 			<Id>1710496626665</Id>
-			<Name><![CDATA[Process]]></Name>
+			<Name><![CDATA[Job]]></Name>
 			<Generic>false</Generic>
 			<GenericParameter>
 				<Id>1710496626671</Id>
